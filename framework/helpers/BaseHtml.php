@@ -1913,7 +1913,7 @@ class BaseHtml
                 $existingClasses[$key] = $class;
             }
         }
-        return array_unique($existingClasses);
+        return ArrayHelper::unique($existingClasses);
     }
 
     /**
