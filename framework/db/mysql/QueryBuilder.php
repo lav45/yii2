@@ -8,8 +8,10 @@
 namespace yii\db\mysql;
 
 use yii\base\InvalidParamException;
+use yii\base\NotSupportedException;
 use yii\db\Exception;
 use yii\db\Expression;
+use yii\db\Query;
 
 /**
  * QueryBuilder is the query builder for MySQL databases.
@@ -294,5 +296,18 @@ class QueryBuilder extends \yii\db\QueryBuilder
             }
         }
         return null;
+    }
+
+    public function buildSelectLock($lockMode)
+    {
+        $selectLock = '';
+        if ($lockMode == Query::SELECT_LOCK_EXCLUSIVE) {
+            $selectLock = ' FOR UPDATE';
+        } elseif ($lockMode == Query::SELECT_LOCK_SHARED) {
+            $selectLock = ' LOCK IN SHARE MODE';
+        } elseif ($lockMode !== null) {
+            throw new NotSupportedException($this->db->getDriverName() . " does not support {$lockMode} select lock mode");
+        }
+        return $selectLock;
     }
 }

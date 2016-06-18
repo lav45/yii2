@@ -8,6 +8,8 @@
 namespace yii\db\pgsql;
 
 use yii\base\InvalidParamException;
+use yii\base\NotSupportedException;
+use yii\db\Query;
 
 /**
  * QueryBuilder is the query builder for PostgreSQL databases.
@@ -299,5 +301,19 @@ class QueryBuilder extends \yii\db\QueryBuilder
 
         return 'INSERT INTO ' . $schema->quoteTableName($table)
         . ' (' . implode(', ', $columns) . ') VALUES ' . implode(', ', $values);
+    }
+
+
+    public function buildSelectLock($lockMode)
+    {
+        $selectLock = '';
+        if ($lockMode == Query::SELECT_LOCK_EXCLUSIVE) {
+            $selectLock = ' FOR UPDATE';
+        } elseif ($lockMode == Query::SELECT_LOCK_SHARED) {
+            $selectLock = ' FOR SHARE';
+        } elseif ($lockMode !== null) {
+            throw new NotSupportedException($this->db->getDriverName() . " does not support {$lockMode} select lock mode");
+        }
+        return $selectLock;
     }
 }

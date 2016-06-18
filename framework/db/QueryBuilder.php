@@ -102,6 +102,7 @@ class QueryBuilder extends \yii\base\Object
 
         $sql = implode($this->separator, array_filter($clauses));
         $sql = $this->buildOrderByAndLimit($sql, $query->orderBy, $query->limit, $query->offset);
+        $sql .= $this->buildSelectLock($query->selectLock);
 
         if (!empty($query->orderBy)) {
             foreach ($query->orderBy as $expression) {
@@ -170,8 +171,8 @@ class QueryBuilder extends \yii\base\Object
         }
 
         return 'INSERT INTO ' . $schema->quoteTableName($table)
-            . (!empty($names) ? ' (' . implode(', ', $names) . ')' : '')
-            . (!empty($placeholders) ? ' VALUES (' . implode(', ', $placeholders) . ')' : ' DEFAULT VALUES');
+        . (!empty($names) ? ' (' . implode(', ', $names) . ')' : '')
+        . (!empty($placeholders) ? ' VALUES (' . implode(', ', $placeholders) . ')' : ' DEFAULT VALUES');
     }
 
     /**
@@ -383,8 +384,8 @@ class QueryBuilder extends \yii\base\Object
         }
 
         return 'ALTER TABLE ' . $this->db->quoteTableName($table) . ' ADD CONSTRAINT '
-            . $this->db->quoteColumnName($name) . '  PRIMARY KEY ('
-            . implode(', ', $columns). ' )';
+        . $this->db->quoteColumnName($name) . '  PRIMARY KEY ('
+        . implode(', ', $columns) . ' )';
     }
 
     /**
@@ -396,7 +397,7 @@ class QueryBuilder extends \yii\base\Object
     public function dropPrimaryKey($name, $table)
     {
         return 'ALTER TABLE ' . $this->db->quoteTableName($table)
-            . ' DROP CONSTRAINT ' . $this->db->quoteColumnName($name);
+        . ' DROP CONSTRAINT ' . $this->db->quoteColumnName($name);
     }
 
     /**
@@ -421,8 +422,8 @@ class QueryBuilder extends \yii\base\Object
     public function addColumn($table, $column, $type)
     {
         return 'ALTER TABLE ' . $this->db->quoteTableName($table)
-            . ' ADD ' . $this->db->quoteColumnName($column) . ' '
-            . $this->getColumnType($type);
+        . ' ADD ' . $this->db->quoteColumnName($column) . ' '
+        . $this->getColumnType($type);
     }
 
     /**
@@ -434,7 +435,7 @@ class QueryBuilder extends \yii\base\Object
     public function dropColumn($table, $column)
     {
         return 'ALTER TABLE ' . $this->db->quoteTableName($table)
-            . ' DROP COLUMN ' . $this->db->quoteColumnName($column);
+        . ' DROP COLUMN ' . $this->db->quoteColumnName($column);
     }
 
     /**
@@ -447,8 +448,8 @@ class QueryBuilder extends \yii\base\Object
     public function renameColumn($table, $oldName, $newName)
     {
         return 'ALTER TABLE ' . $this->db->quoteTableName($table)
-            . ' RENAME COLUMN ' . $this->db->quoteColumnName($oldName)
-            . ' TO ' . $this->db->quoteColumnName($newName);
+        . ' RENAME COLUMN ' . $this->db->quoteColumnName($oldName)
+        . ' TO ' . $this->db->quoteColumnName($newName);
     }
 
     /**
@@ -464,9 +465,9 @@ class QueryBuilder extends \yii\base\Object
     public function alterColumn($table, $column, $type)
     {
         return 'ALTER TABLE ' . $this->db->quoteTableName($table) . ' CHANGE '
-            . $this->db->quoteColumnName($column) . ' '
-            . $this->db->quoteColumnName($column) . ' '
-            . $this->getColumnType($type);
+        . $this->db->quoteColumnName($column) . ' '
+        . $this->db->quoteColumnName($column) . ' '
+        . $this->getColumnType($type);
     }
 
     /**
@@ -509,7 +510,7 @@ class QueryBuilder extends \yii\base\Object
     public function dropForeignKey($name, $table)
     {
         return 'ALTER TABLE ' . $this->db->quoteTableName($table)
-            . ' DROP CONSTRAINT ' . $this->db->quoteColumnName($name);
+        . ' DROP CONSTRAINT ' . $this->db->quoteColumnName($name);
     }
 
     /**
@@ -525,9 +526,9 @@ class QueryBuilder extends \yii\base\Object
     public function createIndex($name, $table, $columns, $unique = false)
     {
         return ($unique ? 'CREATE UNIQUE INDEX ' : 'CREATE INDEX ')
-            . $this->db->quoteTableName($name) . ' ON '
-            . $this->db->quoteTableName($table)
-            . ' (' . $this->buildColumns($columns) . ')';
+        . $this->db->quoteTableName($name) . ' ON '
+        . $this->db->quoteTableName($table)
+        . ' (' . $this->buildColumns($columns) . ')';
     }
 
     /**
@@ -762,7 +763,7 @@ class QueryBuilder extends \yii\base\Object
             }
             // 0:join type, 1:join table, 2:on-condition (optional)
             list ($joinType, $table) = $join;
-            $tables = $this->quoteTableNames((array) $table, $params);
+            $tables = $this->quoteTableNames((array)$table, $params);
             $table = reset($tables);
             $joins[$i] = "$joinType $table";
             if (isset($join[2])) {
@@ -915,7 +916,7 @@ class QueryBuilder extends \yii\base\Object
      */
     protected function hasLimit($limit)
     {
-        return ctype_digit((string) $limit);
+        return ctype_digit((string)$limit);
     }
 
     /**
@@ -925,7 +926,7 @@ class QueryBuilder extends \yii\base\Object
      */
     protected function hasOffset($offset)
     {
-        $offset = (string) $offset;
+        $offset = (string)$offset;
         return ctype_digit($offset) && $offset !== '0';
     }
 
@@ -995,7 +996,7 @@ class QueryBuilder extends \yii\base\Object
             }
             return $condition->expression;
         } elseif (!is_array($condition)) {
-            return (string) $condition;
+            return (string)$condition;
         } elseif (empty($condition)) {
             return '';
         }
@@ -1413,5 +1414,13 @@ class QueryBuilder extends \yii\base\Object
     public function selectExists($rawSql)
     {
         return 'SELECT EXISTS(' . $rawSql . ')';
+    }
+
+    public function buildSelectLock($lockMode)
+    {
+        if ($lockMode !== null) {
+            throw new NotSupportedException($this->db->getDriverName() . ' does not support select lock.');
+        }
+        return '';
     }
 }
