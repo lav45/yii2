@@ -48,22 +48,15 @@ class Query extends Component implements QueryInterface
     use QueryTrait;
 
     /**
-     * Use a lock exclusive
-     */
-    const SELECT_LOCK_EXCLUSIVE = 'exclusive';
-    /**
-     * Use a lock shared
-     */
-    const SELECT_LOCK_SHARED = 'shared';
-
-    /**
      * @var array the columns being selected. For example, `['id', 'name']`.
      * This is used to construct the SELECT clause in a SQL statement. If not set, it means selecting all columns.
      * @see select()
      */
     public $select;
-
-    public $selectLock;
+    /**
+     * @var bool|string
+     */
+    public $forUpdate = false;
     /**
      * @var string additional option that should be appended to the 'SELECT' keyword. For example,
      * in MySQL, the option 'SQL_CALC_FOUND_ROWS' can be used.
@@ -474,9 +467,9 @@ class Query extends Component implements QueryInterface
         return $this;
     }
 
-    public function selectLock($lockMode = self::SELECT_LOCK_SHARED)
+    public function forUpdate($lockMode)
     {
-        $this->selectLock = $lockMode;
+        $this->forUpdate = $lockMode;
         return $this;
     }
 
@@ -912,7 +905,7 @@ class Query extends Component implements QueryInterface
             'orderBy' => $from->orderBy,
             'indexBy' => $from->indexBy,
             'select' => $from->select,
-            'selectLock' => $from->selectLock,
+            'forUpdate' => $from->forUpdate,
             'selectOption' => $from->selectOption,
             'distinct' => $from->distinct,
             'from' => $from->from,

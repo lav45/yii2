@@ -2,9 +2,9 @@
 
 namespace yiiunit\framework\db\mysql;
 
-use yii\db\Expression;
 use yii\db\Query;
 use yii\db\Schema;
+use yii\db\mysql\QueryBuilder;
 use yiiunit\framework\db\QueryBuilderTest;
 
 /**
@@ -58,17 +58,24 @@ class MysqlQueryBuilderTest extends QueryBuilderTest
         ]);
     }
 
-
-	public function testBuildSelectLock()
+	public function testBuildForUpdate()
 	{
-		// expression with params
-		$query = (new Query())
-			->select('*')
-			->from('operations')
-			->orderBy(new Expression('SUBSTR(name, 3, :to) DESC, x ASC', [':to' => 4]));
-		list ($sql, $params) = $this->getQueryBuilder()->build($query);
-		$expected = $this->replaceQuotes('SELECT * FROM [[operations]] ORDER BY SUBSTR(name, 3, :to) DESC, x ASC');
-		$this->assertEquals($expected, $sql);
-		$this->assertEquals([':to' => 4], $params);
+		$tests = [
+			[
+				'lockMode' => QueryBuilder::SELECT_LOCK_EXCLUSIVE,
+				'sql' => 'SELECT * FROM [[operations]] FOR UPDATE',
+			],
+			[
+				'lockMode' => QueryBuilder::SELECT_LOCK_SHARED,
+				'sql' => 'SELECT * FROM [[operations]] LOCK IN SHARE MODE',
+			],
+		];
+
+		foreach($tests as $test) {
+			$query = (new Query())->from('operations')->forUpdate($test['lockMode']);
+			list ($sql) = $this->getQueryBuilder()->build($query);
+			$expected = $this->replaceQuotes($test['sql']);
+			$this->assertEquals($expected, $sql);
+		}
 	}
 }

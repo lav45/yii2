@@ -22,6 +22,15 @@ use yii\db\Query;
 class QueryBuilder extends \yii\db\QueryBuilder
 {
     /**
+     * Use a lock exclusive
+     */
+    const SELECT_LOCK_EXCLUSIVE = 'exclusive';
+    /**
+     * Use a lock shared
+     */
+    const SELECT_LOCK_SHARED = 'shared';
+
+    /**
      * @var array mapping from abstract column types (keys) to physical column types (values).
      */
     public $typeMap = [
@@ -298,16 +307,15 @@ class QueryBuilder extends \yii\db\QueryBuilder
         return null;
     }
 
-    public function buildSelectLock($lockMode)
+    public function buildForUpdate($lockMode)
     {
-        $selectLock = '';
-        if ($lockMode == Query::SELECT_LOCK_EXCLUSIVE) {
-            $selectLock = ' FOR UPDATE';
-        } elseif ($lockMode == Query::SELECT_LOCK_SHARED) {
-            $selectLock = ' LOCK IN SHARE MODE';
-        } elseif ($lockMode !== null) {
-            throw new NotSupportedException($this->db->getDriverName() . " does not support {$lockMode} select lock mode");
+        if ($lockMode == self::SELECT_LOCK_EXCLUSIVE) {
+            $forUpdate = ' FOR UPDATE';
+        } elseif ($lockMode == self::SELECT_LOCK_SHARED) {
+            $forUpdate = ' LOCK IN SHARE MODE';
+        } else {
+            return parent::buildForUpdate($lockMode);
         }
-        return $selectLock;
+        return $forUpdate;
     }
 }

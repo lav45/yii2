@@ -102,7 +102,9 @@ class QueryBuilder extends \yii\base\Object
 
         $sql = implode($this->separator, array_filter($clauses));
         $sql = $this->buildOrderByAndLimit($sql, $query->orderBy, $query->limit, $query->offset);
-        $sql .= $this->buildSelectLock($query->selectLock);
+        if (!empty($query->forUpdate)) {
+            $sql .= $this->buildForUpdate($query->forUpdate);
+        }
 
         if (!empty($query->orderBy)) {
             foreach ($query->orderBy as $expression) {
@@ -1416,10 +1418,10 @@ class QueryBuilder extends \yii\base\Object
         return 'SELECT EXISTS(' . $rawSql . ')';
     }
 
-    public function buildSelectLock($lockMode)
+    public function buildForUpdate($lockMode)
     {
-        if ($lockMode !== null) {
-            throw new NotSupportedException($this->db->getDriverName() . ' does not support select lock.');
+        if ($lockMode !== false) {
+            throw new NotSupportedException($this->db->getDriverName() . " does not support {$lockMode} select lock mode");
         }
         return '';
     }

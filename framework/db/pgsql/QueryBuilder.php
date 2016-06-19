@@ -9,7 +9,6 @@ namespace yii\db\pgsql;
 
 use yii\base\InvalidParamException;
 use yii\base\NotSupportedException;
-use yii\db\Query;
 
 /**
  * QueryBuilder is the query builder for PostgreSQL databases.
@@ -44,6 +43,14 @@ class QueryBuilder extends \yii\db\QueryBuilder
      * @since 2.0.6
      */
     const INDEX_GIN = 'gin';
+    /**
+     * Use a lock exclusive
+     */
+    const SELECT_LOCK_EXCLUSIVE = 'exclusive';
+    /**
+     * Use a lock shared
+     */
+    const SELECT_LOCK_SHARED = 'shared';
 
     /**
      * @var array mapping from abstract column types (keys) to physical column types (values).
@@ -303,17 +310,15 @@ class QueryBuilder extends \yii\db\QueryBuilder
         . ' (' . implode(', ', $columns) . ') VALUES ' . implode(', ', $values);
     }
 
-
-    public function buildSelectLock($lockMode)
+    public function buildForUpdate($lockMode)
     {
-        $selectLock = '';
-        if ($lockMode == Query::SELECT_LOCK_EXCLUSIVE) {
-            $selectLock = ' FOR UPDATE';
-        } elseif ($lockMode == Query::SELECT_LOCK_SHARED) {
-            $selectLock = ' FOR SHARE';
-        } elseif ($lockMode !== null) {
-            throw new NotSupportedException($this->db->getDriverName() . " does not support {$lockMode} select lock mode");
+        if ($lockMode == self::SELECT_LOCK_EXCLUSIVE) {
+            $forUpdate = ' FOR UPDATE';
+        } elseif ($lockMode == self::SELECT_LOCK_SHARED) {
+            $forUpdate = ' FOR SHARE';
+        } else {
+            return parent::buildForUpdate($lockMode);
         }
-        return $selectLock;
+        return $forUpdate;
     }
 }

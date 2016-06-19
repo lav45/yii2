@@ -2,7 +2,9 @@
 
 namespace yiiunit\framework\db\pgsql;
 
+use yii\db\Query;
 use yii\db\Schema;
+use yii\db\pgsql\QueryBuilder;
 use yiiunit\framework\db\QueryBuilderTest;
 
 /**
@@ -120,5 +122,27 @@ class PostgreSQLQueryBuilderTest extends QueryBuilderTest
         $expected = "COMMENT ON TABLE [[comment]] IS NULL";
         $sql = $qb->dropCommentFromTable('comment');
         $this->assertEquals($this->replaceQuotes($expected), $sql);
+    }
+
+
+    public function testBuildForUpdate()
+    {
+        $tests = [
+            [
+                'lockMode' => QueryBuilder::SELECT_LOCK_EXCLUSIVE,
+                'sql' => 'SELECT * FROM [[operations]] FOR UPDATE',
+            ],
+            [
+                'lockMode' => QueryBuilder::SELECT_LOCK_SHARED,
+                'sql' => 'SELECT * FROM [[operations]] FOR SHARE',
+            ],
+        ];
+
+        foreach($tests as $test) {
+            $query = (new Query())->from('operations')->forUpdate($test['lockMode']);
+            list ($sql) = $this->getQueryBuilder()->build($query);
+            $expected = $this->replaceQuotes($test['sql']);
+            $this->assertEquals($expected, $sql);
+        }
     }
 }
