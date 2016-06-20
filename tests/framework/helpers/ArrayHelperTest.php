@@ -723,20 +723,37 @@ class ArrayHelperTest extends TestCase
             'id' => 10,
             3 => 10,
             4 => '10',
+
+            0,
+            false,
+            "",
+            1,
+            "1",
+            true,
+
+            1.1,
+            1.2,
+            1.3,
         ];
 
         $result = ArrayHelper::unique($array, false);
         $this->assertEquals([
-            0 => 'bbb',
-            1 => 'aaa',
-            2 => '10',
+            'bbb',
+            'aaa',
+            10,
+            0,
+            '',
+            1,
         ], $result);
 
         $result = ArrayHelper::unique($array);
         $this->assertEquals([
             'label' => 'bbb',
             '124 ' => 'aaa',
-            4 => '10',
+            4 => 10,
+            6 => 0,
+            7 => '',
+            13 => 1,
         ], $result);
     }
 

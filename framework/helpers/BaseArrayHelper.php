@@ -595,11 +595,13 @@ class BaseArrayHelper
      * @param bool $keepKeys Whether to maintain the array keys. If false, the resulting array
      * @return array
      */
-    public static function unique($array, $keepKeys = true)
+    public static function unique(array $array, $keepKeys = true)
     {
-        return $keepKeys === true ?
-            array_flip(array_flip($array)) :
-            array_keys(array_flip($array));
+        $result = [];
+        foreach ($array as $key => $item) {
+            $result[$item] = $key;
+        }
+        return $keepKeys === true ? array_flip($result) : array_keys($result);
     }
 
     /**
