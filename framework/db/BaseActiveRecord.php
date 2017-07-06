@@ -741,7 +741,7 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
         $rows = static::updateAll($values, $this->getOldPrimaryKey(true));
 
         foreach ($values as $name => $value) {
-            $this->_oldAttributes[$name] = $this->_attributes[$name];
+            $this->setOldAttribute($name, $this->_attributes[$name]);
         }
 
         return $rows;
@@ -783,8 +783,8 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
 
         $changedAttributes = [];
         foreach ($values as $name => $value) {
-            $changedAttributes[$name] = isset($this->_oldAttributes[$name]) ? $this->_oldAttributes[$name] : null;
-            $this->_oldAttributes[$name] = $value;
+            $changedAttributes[$name] = $this->getOldAttribute($name);
+            $this->setOldAttribute($name, $value);
         }
         $this->afterSave(false, $changedAttributes);
 
@@ -817,7 +817,7 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
                 } else {
                     $this->_attributes[$name] += $value;
                 }
-                $this->_oldAttributes[$name] = $this->_attributes[$name];
+                $this->setOldAttribute($name, $this->_attributes[$name]);
             }
 
             return true;
@@ -860,7 +860,7 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
             if ($lock !== null && !$result) {
                 throw new StaleObjectException('The object being deleted is outdated.');
             }
-            $this->_oldAttributes = null;
+            $this->setOldAttributes(null);
             $this->afterDelete();
         }
 
@@ -1120,12 +1120,12 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
             throw new Exception(get_class($this) . ' does not have a primary key. You should either define a primary key for the corresponding table or override the primaryKey() method.');
         }
         if (!$asArray && count($keys) === 1) {
-            return isset($this->_oldAttributes[$keys[0]]) ? $this->_oldAttributes[$keys[0]] : null;
+            return $this->getOldAttribute($keys[0]);
         }
 
         $values = [];
         foreach ($keys as $name) {
-            $values[$name] = isset($this->_oldAttributes[$name]) ? $this->_oldAttributes[$name] : null;
+            $values[$name] = $this->getOldAttribute($name);
         }
 
         return $values;
