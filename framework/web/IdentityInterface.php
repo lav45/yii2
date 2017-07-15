@@ -21,16 +21,6 @@ namespace yii\web;
  *         return static::findOne($id);
  *     }
  *
- *     public static function findIdentityByAccessToken($token, $type = null)
- *     {
- *         return static::findOne(['access_token' => $token]);
- *     }
- *
- *     public function getId()
- *     {
- *         return $this->id;
- *     }
- *
  *     public function getAuthKey()
  *     {
  *         return $this->authKey;
@@ -46,7 +36,7 @@ namespace yii\web;
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @since 2.0
  */
-interface IdentityInterface
+interface IdentityInterface extends \yii\rest\IdentityInterface
 {
     /**
      * Finds an identity by the given ID.
@@ -56,23 +46,6 @@ interface IdentityInterface
      * or the identity is not in an active state (disabled, deleted, etc.)
      */
     public static function findIdentity($id);
-
-    /**
-     * Finds an identity by the given token.
-     * @param mixed $token the token to be looked for
-     * @param mixed $type the type of the token. The value of this parameter depends on the implementation.
-     * For example, [[\yii\filters\auth\HttpBearerAuth]] will set this parameter to be `yii\filters\auth\HttpBearerAuth`.
-     * @return IdentityInterface the identity object that matches the given token.
-     * Null should be returned if such an identity cannot be found
-     * or the identity is not in an active state (disabled, deleted, etc.)
-     */
-    public static function findIdentityByAccessToken($token, $type = null);
-
-    /**
-     * Returns an ID that can uniquely identify a user identity.
-     * @return string|int an ID that uniquely identifies a user identity.
-     */
-    public function getId();
 
     /**
      * Returns a key that can be used to check the validity of a given identity ID.
