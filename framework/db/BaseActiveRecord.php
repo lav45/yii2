@@ -564,7 +564,7 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
 
     /**
      * Returns a value indicating whether the named attribute has been changed.
-     * @param string $name the name of the attribute.
+     * @param string|string[] $name the name of the attribute.
      * @param bool $identical whether the comparison of new and old value is made for
      * identical values using `===`, defaults to `true`. Otherwise `==` is used for comparison.
      * This parameter is available since version 2.0.4.
@@ -572,6 +572,15 @@ abstract class BaseActiveRecord extends Model implements ActiveRecordInterface
      */
     public function isAttributeChanged($name, $identical = true)
     {
+        if (is_array($name)) {
+            foreach ($name as $item) {
+                if ($this->isAttributeChanged($item, $identical) === true) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         if (isset($this->_attributes[$name], $this->_oldAttributes[$name])) {
             if ($identical) {
                 return $this->_attributes[$name] !== $this->_oldAttributes[$name];
