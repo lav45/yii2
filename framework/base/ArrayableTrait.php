@@ -131,15 +131,15 @@ trait ArrayableTrait
                 if ($attribute instanceof Arrayable) {
                     $attribute = $attribute->toArray($nestedFields, $nestedExpand);
                 } elseif (is_array($attribute)) {
-                    $attribute = array_map(
-                        function ($item) use ($nestedFields, $nestedExpand) {
-                            if ($item instanceof Arrayable) {
-                                return $item->toArray($nestedFields, $nestedExpand);
-                            }
-                            return $item;
-                        },
-                        $attribute
-                    );
+                    $result = [];
+                    foreach ($attribute as $item) {
+                        if ($item instanceof Arrayable) {
+                            $result[] = $item->toArray($nestedFields, $nestedExpand);
+                        } else {
+                            $result[] = $item;
+                        }
+                    }
+                    $attribute = $result;
                 }
             }
             $data[$field] = $attribute;
