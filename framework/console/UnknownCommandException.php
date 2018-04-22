@@ -71,7 +71,7 @@ class UnknownCommandException extends Exception
             return [];
         }
         /** @var $helpController HelpController */
-        [$helpController, $actionID] = $help;
+        $helpController = $help[0];
 
         $availableActions = [];
         $commands = $helpController->getCommands();
@@ -85,7 +85,7 @@ class UnknownCommandException extends Exception
 
             // add all actions of this controller
             /** @var $controller Controller */
-            [$controller, $actionID] = $result;
+            $controller = $result[0];
             $actions = $helpController->getActions($controller);
             if (!empty($actions)) {
                 $prefix = $controller->getUniqueId();
@@ -116,20 +116,20 @@ class UnknownCommandException extends Exception
     private function filterBySimilarity($actions, $command)
     {
         $alternatives = [];
+        $distances = [];
 
-        // suggest alternatives that begin with $command first
         foreach ($actions as $action) {
+            // suggest alternatives that begin with $command first
             if (strpos($action, $command) === 0) {
                 $alternatives[] = $action;
             }
-        }
 
-        // calculate the Levenshtein distance between the unknown command and all available commands.
-        $distances = array_map(function ($action) use ($command) {
-            $action = strlen($action) > 255 ? substr($action, 0, 255) : $action;
-            $command = strlen($command) > 255 ? substr($command, 0, 255) : $command;
-            return levenshtein($action, $command);
-        }, array_combine($actions, $actions));
+            // calculate the Levenshtein distance between the unknown command and all available commands.
+            $distances[$action] = levenshtein(
+                strlen($action) > 255 ? substr($action, 0, 255) : $action,
+                strlen($command) > 255 ? substr($command, 0, 255) : $command
+            );
+        }
 
         // we assume a typo if the levensthein distance is no more than 3, i.e. 3 replacements needed
         $relevantTypos = array_filter($distances, function ($distance) {
