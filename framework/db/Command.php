@@ -249,7 +249,7 @@ class Command extends Component
             // master is in a transaction. use the same connection.
             $forRead = false;
         }
-        if ($forRead || $forRead === null && $this->db->getSchema()->isReadQuery($sql)) {
+        if ($forRead || ($forRead === null && $this->db->getSchema()->isReadQuery($sql))) {
             $pdo = $this->db->getSlavePdo();
         } else {
             $pdo = $this->db->getMasterPdo();
@@ -496,12 +496,13 @@ class Command extends Component
     public function batchInsert($table, $columns, $rows)
     {
         $table = $this->db->quoteSql($table);
-        $columns = array_map(function ($column) {
-            return $this->db->quoteSql($column);
-        }, $columns);
+        $quote_columns = [];
+        foreach ($columns as $column) {
+            $quote_columns[] = $this->db->quoteSql($column);
+        }
 
         $params = [];
-        $sql = $this->db->getQueryBuilder()->batchInsert($table, $columns, $rows, $params);
+        $sql = $this->db->getQueryBuilder()->batchInsert($table, $quote_columns, $rows, $params);
 
         $this->setRawSql($sql);
         $this->bindValues($params);
