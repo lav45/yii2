@@ -236,9 +236,16 @@ class Cors extends ActionFilter
     protected function headerize($string)
     {
         $headers = preg_split('/[\\s,]+/', $string, -1, PREG_SPLIT_NO_EMPTY);
-        $headers = array_map(function ($element) {
-            return str_replace(' ', '-', ucwords(strtolower(str_replace(['_', '-'], [' ', ' '], $element))));
-        }, $headers);
-        return implode(', ', $headers);
+
+        $elements = [];
+        foreach ($headers as $element) {
+            $element = str_replace(['_', '-'], ' ', $element);
+            $element = strtolower($element);
+            $element = ucwords($element);
+            $element = str_replace(' ', '-', $element);
+            $elements[] = $element;
+        }
+
+        return implode(', ', $elements);
     }
 }
