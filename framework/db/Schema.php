@@ -802,9 +802,11 @@ abstract class Schema extends BaseObject
         }
 
         if ($multiple) {
-            return array_map(function (array $row) {
-                return array_change_key_case($row, CASE_LOWER);
-            }, $row);
+            $result = [];
+            foreach ($row as $value) {
+                $result[] = array_change_key_case($value, CASE_LOWER);
+            }
+            return $result;
         }
 
         return array_change_key_case($row, CASE_LOWER);
