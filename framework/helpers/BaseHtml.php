@@ -939,8 +939,13 @@ class BaseHtml
         if (substr($name, -2) !== '[]') {
             $name .= '[]';
         }
-        if (ArrayHelper::isTraversable($selection)) {
-            $selection = array_map('strval', (array)$selection);
+        $isArraySelection = ArrayHelper::isTraversable($selection);
+        if ($isArraySelection) {
+            $result = [];
+            foreach ((array)$selection as $item) {
+                $result[] = (string)$item;
+            }
+            $selection = $result;
         }
 
         $formatter = ArrayHelper::remove($options, 'item');
@@ -952,9 +957,10 @@ class BaseHtml
         $lines = [];
         $index = 0;
         foreach ($items as $value => $label) {
-            $checked = $selection !== null &&
-                (!ArrayHelper::isTraversable($selection) && !strcmp($value, $selection)
-                    || ArrayHelper::isTraversable($selection) && ArrayHelper::isIn((string)$value, $selection));
+            $checked = $selection !== null && (
+                    (!$isArraySelection && !strcmp($value, $selection)) ||
+                    ($isArraySelection && ArrayHelper::isIn((string)$value, $selection))
+                );
             if ($formatter !== null) {
                 $lines[] = call_user_func($formatter, $index, $label, $name, $checked, $value);
             } else {
@@ -1019,8 +1025,13 @@ class BaseHtml
      */
     public static function radioList($name, $selection = null, $items = [], $options = [])
     {
-        if (ArrayHelper::isTraversable($selection)) {
-            $selection = array_map('strval', (array)$selection);
+        $isArraySelection = ArrayHelper::isTraversable($selection);
+        if ($isArraySelection) {
+            $result = [];
+            foreach ((array)$selection as $item) {
+                $result[] = (string)$item;
+            }
+            $selection = $result;
         }
 
         $formatter = ArrayHelper::remove($options, 'item');
@@ -1035,9 +1046,10 @@ class BaseHtml
         $lines = [];
         $index = 0;
         foreach ($items as $value => $label) {
-            $checked = $selection !== null &&
-                (!ArrayHelper::isTraversable($selection) && !strcmp($value, $selection)
-                    || ArrayHelper::isTraversable($selection) && ArrayHelper::isIn((string)$value, $selection));
+            $checked = $selection !== null && (
+                    (!$isArraySelection && !strcmp($value, $selection)) ||
+                    ($isArraySelection && ArrayHelper::isIn((string)$value, $selection))
+                );
             if ($formatter !== null) {
                 $lines[] = call_user_func($formatter, $index, $label, $name, $checked, $value);
             } else {
@@ -1815,8 +1827,13 @@ class BaseHtml
      */
     public static function renderSelectOptions($selection, $items, &$tagOptions = [])
     {
-        if (ArrayHelper::isTraversable($selection)) {
-            $selection = array_map('strval', (array)$selection);
+        $isArraySelection = ArrayHelper::isTraversable($selection);
+        if ($isArraySelection) {
+            $result = [];
+            foreach ((array)$selection as $item) {
+                $result[] = (string)$item;
+            }
+            $selection = $result;
         }
 
         $lines = [];
@@ -1854,11 +1871,12 @@ class BaseHtml
                 $lines[] = static::tag('optgroup', "\n" . $content . "\n", $groupAttrs);
             } else {
                 $attrs = isset($options[$key]) ? $options[$key] : [];
-                $attrs['value'] = (string) $key;
+                $attrs['value'] = $key = (string) $key;
                 if (!array_key_exists('selected', $attrs)) {
-                    $attrs['selected'] = $selection !== null &&
-                        (!ArrayHelper::isTraversable($selection) && !strcmp($key, $selection)
-                        || ArrayHelper::isTraversable($selection) && ArrayHelper::isIn((string)$key, $selection));
+                    $attrs['selected'] = $selection !== null && (
+                            (!$isArraySelection && !strcmp($key, $selection)) ||
+                            ($isArraySelection && ArrayHelper::isIn($key, $selection))
+                        );
                 }
                 $text = $encode ? static::encode($value) : $value;
                 if ($encodeSpaces) {
