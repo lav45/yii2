@@ -457,8 +457,10 @@ class Validator extends Component
      */
     public function getAttributeNames()
     {
-        return array_map(function ($attribute) {
-            return ltrim($attribute, '!');
-        }, $this->attributes);
+        $result = [];
+        foreach ((array)$this->attributes as $attribute) {
+            $result[] = ltrim($attribute, '!');
+        }
+        return $result;
     }
 }
