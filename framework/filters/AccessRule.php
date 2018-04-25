@@ -281,7 +281,16 @@ class AccessRule extends Component
      */
     protected function matchVerb($verb)
     {
-        return empty($this->verbs) || in_array(strtoupper($verb), array_map('strtoupper', $this->verbs), true);
+        if (empty($this->verbs)) {
+            return true;
+        }
+        $verb = strtoupper($verb);
+        foreach ($this->verbs as $value) {
+            if (strtoupper($value) === $verb) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
