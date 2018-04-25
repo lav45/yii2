@@ -103,8 +103,10 @@ class FileTarget extends Target
     {
         $logPath = dirname($this->logFile);
         FileHelper::createDirectory($logPath, $this->dirMode, true);
-
-        $text = implode("\n", array_map([$this, 'formatMessage'], $this->messages)) . "\n";
+        $text = '';
+        foreach ($this->messages as $message) {
+            $text .= $this->formatMessage($message) . "\n";
+        }
         if (($fp = @fopen($this->logFile, 'a')) === false) {
             throw new InvalidConfigException("Unable to append to log file: {$this->logFile}");
         }

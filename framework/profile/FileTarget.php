@@ -71,7 +71,11 @@ class FileTarget extends Target
         $totalTime = microtime(true) - YII_BEGIN_TIME;
         $text = "Total processing time: {$totalTime} ms; Peak memory: {$memoryPeakUsage} B. \n\n";
 
-        $text .= implode("\n", array_map([$this, 'formatMessage'], $messages));
+        $items = [];
+        foreach ($messages as $message) {
+            $items[] = $this->formatMessage($message);
+        }
+        $text .= implode("\n", $items);
 
         $filename = $this->resolveFilename();
         if (file_exists($filename)) {

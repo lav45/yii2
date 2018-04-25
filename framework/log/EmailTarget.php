@@ -82,7 +82,10 @@ class EmailTarget extends Target
         if (empty($this->message['subject'])) {
             $this->message['subject'] = 'Application Log';
         }
-        $messages = array_map([$this, 'formatMessage'], $this->messages);
+        $messages = [];
+        foreach ($this->messages as $message) {
+            $messages[] = $this->formatMessage($message);
+        }
         $body = wordwrap(implode("\n", $messages), 70);
         $message = $this->composeMessage($body);
         if (!$message->send($this->mailer)) {
