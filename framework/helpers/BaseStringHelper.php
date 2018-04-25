@@ -274,7 +274,11 @@ class BaseStringHelper
                     return trim($v, $trim);
                 };
             }
-            $result = array_map($trim, $result);
+            $items = [];
+            foreach ($result as $item) {
+                $items[] = $trim($item);
+            }
+            $result = $items;
         }
         if ($skipEmpty) {
             // Wrapped with array_values to make array keys sequential after empty values removing
@@ -307,7 +311,7 @@ class BaseStringHelper
      */
     public static function normalizeNumber($value)
     {
-        $value = "$value";
+        $value = (string)$value;
 
         $localeInfo = localeconv();
         $decimalSeparator = isset($localeInfo['decimal_point']) ? $localeInfo['decimal_point'] : null;
