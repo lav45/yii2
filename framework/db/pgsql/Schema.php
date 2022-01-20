@@ -550,15 +550,11 @@ SQL;
                 $column->defaultValue = null;
             } elseif ($column->defaultValue) {
                 if (
-                    in_array($column->type, [self::TYPE_TIMESTAMP, self::TYPE_DATE, self::TYPE_TIME], true) &&
-                    in_array(
-                        strtoupper($column->defaultValue),
-                        ['NOW()', 'CURRENT_TIMESTAMP', 'CURRENT_DATE', 'CURRENT_TIME'],
-                        true
-                    )
+                    substr($column->defaultValue, -2) === '()' ||
+                    in_array(strtoupper($column->defaultValue), ['CURRENT_TIMESTAMP', 'CURRENT_DATE', 'CURRENT_TIME'],true)
                 ) {
-                    $column->defaultValue = new Expression($column->defaultValue);
-                } elseif ($column->type === 'boolean') {
+                    $column->defaultValue = null;
+                } elseif ($column->type === self::TYPE_BOOLEAN) {
                     $column->defaultValue = ($column->defaultValue === 'true');
                 } elseif (preg_match("/^B'(.*?)'::/", $column->defaultValue, $matches)) {
                     $column->defaultValue = bindec($matches[1]);
